@@ -1,0 +1,68 @@
+* {
+    padding: 0;
+    margin: 0;
+}
+
+html {
+    width: 100%;
+    height: 100%;
+    --input-area-height: 40px;
+}
+
+#gamecontainer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    background-color: bisque;
+    border: 3px outset bisque;
+}
+
+div#terminal {
+    background: rgb(20,20,20);
+    color: rgb(210,210,210);
+    border: 3px inset bisque;
+    border-radius: 10px;
+    padding: 5px;
+    margin: 0;
+    overflow: scroll;
+    display: block;
+    position: absolute;
+    right: 5px;
+    left: 5px;
+    top: 5px;
+    bottom: var(--input-area-height);
+    font-family:'Courier New', Courier, monospace; 
+}
+
+div#inputs {
+    height: var(--input-area-height);
+    bottom: 5px;
+    display: flex;
+    align-items: center;
+    align-content: center;
+    position: absolute;
+    top: calc(100% - var(--input-area-height));
+    bottom: 5px;
+    left: 5px;
+    right: 5px;
+}
+
+div#inputs button {
+    display: inline-block;
+    height: calc(var(--input-area-height) * 0.8);
+    padding: 0 5px;
+    margin: 0 auto;
+    margin-top: calc(var(--input-area-height) * 0.05);
+    -webkit-appearance: none;
+    background: rgb(220,220,220);
+    color: rgb(20,20,20);
+    border: 3px inset bisque;
+    border-radius: 16px;
+    width: 15vw;
+}
+
+div#inputs button:active {
+    background: lime;
+}
