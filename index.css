@@ -1,3 +1,13 @@
+@font-face {
+    font-family: vt323;
+    src: url(./VT323/VT323-Regular.ttf);
+}
+
+@font-face {
+    font-family: firecode;
+    src: url(./Fira_Code/static/FiraCode-Regular.ttf);
+}
+
 * {
     padding: 0;
     margin: 0;
@@ -6,7 +16,11 @@
 html {
     width: 100%;
     height: 100%;
-    --input-area-height: 40px;
+    --input-area-height: 70px;
+}
+
+body {
+    background: black;
 }
 
 #gamecontainer {
@@ -16,7 +30,7 @@ html {
     left: 0;
     bottom: 0;
     background-color: bisque;
-    border: 3px outset bisque;
+    /* border: 3px outset bisque; */
 }
 
 div#terminal {
@@ -33,14 +47,34 @@ div#terminal {
     left: 5px;
     top: 5px;
     bottom: var(--input-area-height);
-    font-family:'Courier New', Courier, monospace; 
+    font-family:firecode;
+    font-size: 15px;
+}
+
+
+div#terminal div {
+    display:block;
+    transition: opacity 0.5s, bottom 0.5s, left 0.5s;
+    position: relative;
+    /* left: 1000px; */
+    bottom: -5px;
+    opacity: 0;
+}
+
+div#terminal div.choice-indicator {
+    width: 18px;
+    float: left;
+}
+div#terminal div.choice-text {
+    width: calc(100% - 27px);
+    float: left;
 }
 
 div#inputs {
     height: var(--input-area-height);
     bottom: 5px;
     display: flex;
-    align-items: center;
+    align-items: center top;
     align-content: center;
     position: absolute;
     top: calc(100% - var(--input-area-height));
@@ -51,18 +85,47 @@ div#inputs {
 
 div#inputs button {
     display: inline-block;
-    height: calc(var(--input-area-height) * 0.8);
+    height: calc(var(--input-area-height) * 0.6 - 5px);
     padding: 0 5px;
     margin: 0 auto;
-    margin-top: calc(var(--input-area-height) * 0.05);
+
+    margin-top: 5px;
     -webkit-appearance: none;
     background: rgb(220,220,220);
     color: rgb(20,20,20);
-    border: 3px inset bisque;
-    border-radius: 16px;
+    border: 3px outset grey;
+    border-radius: 26px;
     width: 15vw;
+    font-family:Georgia, 'Times New Roman', Times, serif;
+    font-size: calc(var(--input-area-height)/3);
+}
+div#inputs button#button_delta {
+    height: calc(var(--input-area-height) * 0.7 - 5px);
+    padding-bottom: calc(var(--input-area-height) * 0.6 - 5px);
+    font-size: 200%;
 }
 
 div#inputs button:active {
     background: lime;
+    border: 3px inset grey;
+}
+
+.color_red {
+    color: red;
+}
+
+@media print {
+    body {
+        position: static;
+    }
+    div#terminal {
+        position: static;
+        color: black;
+        background-color: white;
+        border: none;
+    }
+    div#inputs {
+        position: static;
+        visibility: hidden;
+    }
 }
