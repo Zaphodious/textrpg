@@ -70,6 +70,10 @@ div#terminal div.choice-text {
     float: left;
 }
 
+.exposition {
+    color: grey;
+}
+
 div#inputs {
     height: var(--input-area-height);
     bottom: 5px;
@@ -91,7 +95,7 @@ div#inputs button {
 
     margin-top: 5px;
     -webkit-appearance: none;
-    background: rgb(220,220,220);
+    /* background: rgb(220,220,220); */
     color: rgb(20,20,20);
     border: 3px outset grey;
     border-radius: 26px;
@@ -103,6 +107,26 @@ div#inputs button#button_delta {
     height: calc(var(--input-area-height) * 0.7 - 5px);
     padding-bottom: calc(var(--input-area-height) * 0.6 - 5px);
     font-size: 200%;
+}
+div#inputs button#button_delta, .delta {
+    background-color: rgb(200,200,255);
+    color: black;
+}
+div#inputs button#button_gamma, .gamma {
+    background-color: rgb(186,255,201);
+    color: black;
+}
+div#inputs button#button_sigma, .sigma {
+    background-color: rgb(255,179,186);
+    color: black;
+}
+div#inputs button#button_alpha, .alpha {
+    background-color: rgb(255,233,186);
+    color: black;
+}
+div#inputs button#button_omega, .omega {
+    background-color: rgb(255,255,186);
+    color: black;
 }
 
 div#inputs button:active {
