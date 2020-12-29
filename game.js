@@ -54,8 +54,10 @@ async function newgame() {
         terminal.tblank()
         await terminal.twait(1000)
     }
-    terminal.tprint(`?> I don't know, honestly. I found you in the gutter with that massive head wound.
-    Your clothes are too nice for you to be homeless, so I brought you back here.`)
+    terminal.tprint(`?> I don't know, honestly. I found you in the gutter with that massive head wound.`)
+    await terminal.twait(6000)
+    terminal.tblank()
+    terminal.tprint(`?> Your clothes are too nice for you to be homeless, so I brought you back here.`)
     await terminal.twait(2000)
     terminal.tblank()
     let res1 = await terminal.tchoices({
@@ -67,6 +69,16 @@ async function newgame() {
         await terminal.twait(500)
         terminal.tprint("?> Not at all. Don't worry about it. Just happy I could help.")
         playerstate.rep.jack += 3
+        terminal.tblank()
+        terminal.tprint('You nod, not knowing exactly what he did, but still grateful').classList.add('exposition')
+        terminal.tblank()
+        await terminal.twait(500)
+        await terminal.tchoicenext("That was... nice, of you.")
+        await terminal.twait(500)
+        terminal.tprint("?> Again, think nothing of it")
+        await terminal.twait(500)
+        terminal.tblank()
+        res1 = await terminal.tchoicenext("My things, then. Was there anything on me me when you found me?")
     }
     if (res1 == 'gamma') {
         await terminal.twait(1000)
@@ -81,6 +93,42 @@ async function newgame() {
             delta:"...",
             sigma:"Doesn't mean you shouldn't try and help more of them."
         })
+        if (followup == 'gamma') {
+            await terminal.twait(500)
+            terminal.tprint(`Your host doesn't stop frowing, but looks back up at you`).classList.add('exposition')
+            await terminal.twait(1000)
+            terminal.tprint(`?> That's alright. I'm glad I can do anything to help, at all. Most can't. Most wouldn't if they could.`)
+            let followup = await terminal.tchoices({
+                gamma:"Well, I certainly will be, if I ever have the chance",
+                delta:"Maybe you're right. You still did the right thing.",
+                sigma:"People are people. We do what we think is best for us."
+            })
+            await terminal.twait(1000)
+            switch (followup) {
+                case "gamma":
+                    await terminal.twait(500)
+                    terminal.tprint(`Your host smiles, just a little.`).classList.add('exposition')
+                    playerstate.rep.jack += 3
+                    await terminal.twait(1000)
+                    terminal.tprint("?> See that you do. It does something wonerful for the soul.")
+                    await terminal.tchoicenext("...")
+                    break;
+                case "delta":
+                    await terminal.twait(500)
+                    terminal.tprint(`Your host closes his eyes, smiles just a bit, and nods.`).classList.add('exposition')
+                    await terminal.twait(500)
+                    terminal.tprint(`?> Thank you. Now if every citizen of this city would do the same, we'd lift ourselves out of this muck before year's end`)
+                    await terminal.twait(1500)
+                    terminal.tblank()
+                    terminal.tprint("?> But enough about me. You're the injured party here.")
+                    await terminal.twait(500)
+                    playerstate.rep.jack += 1
+                    break;
+            }
+            terminal.tprint("Unfortunately you can't stay here forever. Some other poor sod might need helping. Did you have another question before we get you back on your feet?")
+            res1 = await terminal.tchoicenext("Yes, did I have anything when you found me?")
+
+        }
         if (followup == "sigma") {
             await terminal.typeprint('Now listen here buddy', 200, "?>")
             await terminal.twait(500)
@@ -95,24 +143,15 @@ async function newgame() {
             await terminal.typeprint("Now... ", 300, '?>')
             await terminal.twait(500)
             terminal.tprint(`?> I'm sure you have more questions`)
+            await terminal.twait(1000)
+            terminal.tprint("Your host calms a little, but his expression is steely").classList.add('exposition')
+            await terminal.twait(500)
+            res1 = await terminal.tchoicenext("Uhh... yeah... what did I have with me?")
+
         }
     }
     if (res1 != 'delta') {
         if (res1 == 'sigma') {
-            terminal.tblank()
-            terminal.tprint('You nod, not knowing exactly what he did, but still grateful').classList.add('exposition')
-            terminal.tblank()
-            await terminal.twait(500)
-            await terminal.tchoicenext("That was... nice, of you.")
-            await terminal.twait(500)
-            terminal.tprint("?> Again, think nothing of it")
-            await terminal.twait(500)
-            terminal.tblank()
-            res1 = await terminal.tchoicenext("My things, then. Was there anything on me me when you found me?")
-        }
-        if (res1 == 'gamma') {
-            terminal.tblank()
-            res1 = await terminal.tchoicenext("Well, regardless, did I have anything on me when you found me?")
         }
     }
     if (res1 == 'delta') {

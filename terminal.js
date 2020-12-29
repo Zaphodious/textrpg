@@ -75,6 +75,12 @@ export function tdivider(symb, middle) {
         let seg = line_of_symb(symbreal, segment_w)
         // ... and the thing in the middle
         s = `${seg}${middle}${seg}`
+        // If we get an off-by-one, easiest way to make sure that
+        // the line doesn't wrap is to remove one of the characters. 
+        // Here, we opt to remove the first one.
+        if (s.length > w) {
+            s = s.slice(1, s.length)
+        }
     } else {
         // Super simple, just use line_of_symb to make a line of symbols
         s = line_of_symb(symbreal,w)
@@ -87,11 +93,19 @@ export function tdivider(symb, middle) {
     return n
 }
 
+/**
+ * Inserts a blank line into the terminal
+ */
 export function tblank() {
+    // Each line is a div, and this is no different
     let d = document.createElement('div')
+    // The style is simportant
     d.style.display = 'block'
     d.style.height = CHARHEIGHT
+    // In order that the line actual function as a blank line, we need to have
+    // at least one character of content. So, we add an html blank character.
     d.innerHTML = "&nbsp;"
+    // Add it to the terminal
     term_append(d)
     return d
 }
@@ -108,9 +122,12 @@ export function tprint(messagecontents) {
     // If this is an array of elements, each one gets added to the div individually
     if (Array.isArray(messagecontents)) {
         for (let el of messagecontents) {
+            // Append them one by one
             d.append(el)
         }
     } else {
+        // We use .append in particular, because it handles text. Other methods are
+        // DOM-node spcific
         d.append(messagecontents)
     }
     // Put that sucker in the terminal
@@ -143,6 +160,9 @@ export function twidth() {
     return Math.floor((terminal.clientWidth-total_margin) / CHARWIDTH)
 }
 
+/**
+ * Same as twidth, but gives the height in characters
+ */
 export function theight() {
     let total_margin=10
     return Math.floor((terminal.clientHeight-total_margin) / CHARHEIGHT)
@@ -156,34 +176,53 @@ export function psudoclear() {
     let s = ''
     // add \n for theight + 10 (arbitrary number, because
     // theight on its own didn't work all the way)
-    for (let i = 0; i<theight()+10; i++) {
+    for (let i = 0; i<theight()*1.5; i++) {
         s+='\n'
     }
     // print the pre, and return the result
     return hprint(`<pre>${s}</pre>`)
 }
 
+/**
+ * Types the message text out, one letter at a time. Delay determins the time that passes
+ * between letters. If something is passed in as 'pre', it will be printed to the line before
+ * the rest of the text is typed out
+ * @param {*} message 
+ * @param {*} delay 
+ * @param {*} pre 
+ */
 export async function typeprint(message, delay, pre) {
+    // gotta love a lack of default params
     pre = pre || ""
     delay = delay || 100
+    // as always, we start with a div
     let d = document.createElement('div')
-    d.style.display = 'block'
-    d.style.height = CHARHEIGHT
+    // Even if Pre doesn't exist, popping it into the beginning isn't detrimental
     d.append(pre)
+    // If pre doesn't exist, we begin with the first character of the message string so that the
+    // line doesn't collapse
     if (!pre) {
         d.append(message[0])
     }
+    // Add the div to the terminal
     term_append(d)
+    // If pre, we didn't add the first character to the div, so we do so now
     if (pre) {
         await twait(delay)
         d.append(message[0])
         scroll_last()
     }
+    // Now, regardless of if 'pre' exists, we can iterate over the remaining characters
+    // of the string
     for (let char of message.slice(1,message.length)) {
+        // Wait for the delay, to give the actual typewriter effect
         await twait(delay)
+        // Pop on the character
         d.append(char)
+        // Scroll to the bottom, otherwise typed text might wrap and not be visible
         scroll_last()
     }
+    // So that we don't end right away when the typing animation is done
     await twait(delay)
     return d
 }
