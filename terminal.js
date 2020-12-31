@@ -236,6 +236,11 @@ export function tcontents() {
     return terminal.innerHTML
 }
 
+export function set_tcontents(newtcontents) {
+    terminal.innerHTML = newtcontents
+    return newtcontents
+}
+
 /**
  * Symbols used for for the terminal's buttons, and other things
  */
@@ -439,4 +444,30 @@ console.log(debug)
 if (debug) {
     tprint('debug mode detected')
     psudoclear()
+}
+ 
+export function savestate(state, slot) {
+    if (slot == undefined) {
+        slot = localStorage.length
+    }
+    console.log(slot)
+    let full_state={state, tout:tcontents()}
+    localStorage.setItem(slot, JSON.stringify(full_state))
+    return slot
+}
+
+export function loadstate(slot, restore_terminal_state) {
+    restore_terminal_state = restore_terminal_state || false
+    if (slot in localStorage) {
+        let {state, tout} = JSON.parse(localStorage.getItem(slot))
+        if (restore_terminal_state) {
+            set_tcontents(tout)
+        }
+        return state
+    }
+    return false
+}
+
+export function stateslotsused() {
+    return localStorage.length
 }
