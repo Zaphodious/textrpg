@@ -62,16 +62,53 @@ div#terminal div {
 }
 
 div#terminal div.choice-indicator {
-    width: 18px;
+    width: calc(1ch * 3);
     float: left;
+    padding-left: 2ch;
+    border-radius: 1ch;
 }
 div#terminal div.choice-text {
-    width: calc(100% - 27px);
+    margin-left: calc(1ch * 0.4);
+    width: calc(100% - 1ch * 6);
     float: left;
+}
+
+div#terminal span.chosen-symbol {
+    width:calc(1ch * 2);
+    display: inline-block;
+    padding-left: 1ch;
+    border-radius: 1ch;
+}
+
+.item-description {
+    color: grey;
+    border-left: 1ch solid grey;
+    border-bottom: calc(1ch*0.3) solid grey;
+    border-color: grey;
+    border-bottom-left-radius: 5px;
+    padding-left: 1ch;
+    padding-bottom: calc(1ch * 0.5);
+    margin-bottom: calc(1ch * 0.2);
 }
 
 .exposition {
     color: grey;
+    border-left: 1ch grey solid;
+    border-right: 1ch grey solid;
+    border-radius: 1ch;
+    padding-left: 1ch;
+    padding-right: 1ch;
+    margin-top: 1.335em;
+}
+
+.dialog, .choice_begin{
+    margin-top: 1.335em;
+}
+
+.dialog .dialog_tag {
+    /*https://icolorpalette.com/color/muted-blue*/
+    background-color: #3b719f;
+    padding: 0 1ch;
 }
 
 div#inputs {
@@ -141,15 +178,28 @@ div#inputs button:active {
 @media print {
     body {
         position: static;
+        overflow: initial;
     }
     div#terminal {
-        position: static;
+        position: relative;
         color: black;
         background-color: white;
         border: none;
+        height: 100%;
+        bottom: 0;
+        overflow:visible!important;
+        overflow-y: visible;
+    }
+    div#gamecontainer {
+        position: static;
+        display: block;
     }
     div#inputs {
         position: static;
         visibility: hidden;
+    }
+    .psudoclear {
+        page-break-after: always;
+        max-height: 1em;
     }
 }

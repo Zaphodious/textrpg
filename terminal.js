@@ -20,7 +20,7 @@ export function scroll_last() {
  * certain CSS properties so that it shows a nice transition
  * @param {div} elem 
  */
-function term_append(elem, animate) {
+async function term_append(elem, animate) {
     animate = animate || true
     // we know that elem is something that can be appended by this point
     terminal.appendChild(elem)
@@ -38,6 +38,7 @@ function term_append(elem, animate) {
     }
     // We want what we just appended to be seen right away
     scroll_last()
+    await twait(500)
 }
 
 /**
@@ -61,7 +62,7 @@ function line_of_symb(symb, length) {
  * @param {*} symb 
  * @param {*} middle 
  */
-export function tdivider(symb, middle) {
+export function tdivider(symb, middle, ...classes) {
     // I wish Javascript had default params
     let symbreal = symb || '-'
     // Set the string to build
@@ -86,7 +87,7 @@ export function tdivider(symb, middle) {
         s = line_of_symb(symbreal,w)
     }
     // print the line to the terminal
-    let n = tprint(s)
+    let n = tprint(s, ...classes)
     // Just in case something is floated above or below
     tfloatclear()
     // Return the result of tprint, just in case
@@ -96,7 +97,7 @@ export function tdivider(symb, middle) {
 /**
  * Inserts a blank line into the terminal
  */
-export function tblank() {
+export async function tblank(...classes) {
     // Each line is a div, and this is no different
     let d = document.createElement('div')
     // The style is simportant
@@ -106,7 +107,10 @@ export function tblank() {
     // at least one character of content. So, we add an html blank character.
     d.innerHTML = "&nbsp;"
     // Add it to the terminal
-    term_append(d)
+    for (let c of classes) {
+        d.classList.add(c)
+    }
+    await term_append(d)
     return d
 }
 
@@ -116,7 +120,7 @@ export function tblank() {
  * adds the items sequentially
  * @param {*} messagecontents 
  */
-export function tprint(messagecontents) {
+export async function tprint(messagecontents, ...classes) {
     // We're putting everything we do inside a div
     let d = document.createElement('div')
     // If this is an array of elements, each one gets added to the div individually
@@ -130,22 +134,57 @@ export function tprint(messagecontents) {
         // DOM-node spcific
         d.append(messagecontents)
     }
+    console.log(messagecontents, classes)
+    for (let c of classes) {
+        if (c) {
+            d.classList.add(c)
+        }
+    }
     // Put that sucker in the terminal
-    term_append(d)
+    await term_append(d)
     return d
+}
+
+/**
+ * Prints a line of dialog to the terminal screen. Aside
+ * from 'name', identical to tprint()
+ * @param {*} name 
+ * @param {*} messagecontents 
+ */
+export async function dprint(name, messagecontents, ...classes) {
+    console.log()
+    let s = document.createElement('span')
+    s.innerHTML = `&lt${name}&gt`
+    s.classList.add("dialog_tag")
+    
+    if (Array.isArray(messagecontents)) {
+        messagecontents = [s, " ", ...messagecontents]        
+    } else {
+        messagecontents = [s, " ", messagecontents]
+    }
+    classes.push('dialog')
+    classes.push(`name-${name}`)
+    return await tprint(messagecontents, ...classes)
 }
 
 /**
  * Renders unescaped html markup to the terminal
  * @param {*} markup 
  */
-export function hprint(markup) {
+export async function hprint(pre, markup) {
     // We're putting our things inside a div
     let d = document.createElement('div')
+    if (!markup) {
+        markup = pre
+    } else {
+        markup =`<span class="dialog_tag">&lt${pre}&gt</span>${markup}`
+        d.classList.add('dialog')
+        d.classList.add(`name-${pre}`)
+    }
     // Shove the raw markup into the element
     d.innerHTML = markup
     // Get it into the terminal
-    term_append(d)
+    await term_append(d)
     return d
 }
 
@@ -172,7 +211,7 @@ export function theight() {
  * Prints multiple newlines to the terminal, resulting in a "clear"
  * screen that preserves the terminal's history
  */
-export function psudoclear() {
+export async function psudoclear() {
     let s = ''
     // add \n for theight + 10 (arbitrary number, because
     // theight on its own didn't work all the way)
@@ -180,7 +219,9 @@ export function psudoclear() {
         s+='\n'
     }
     // print the pre, and return the result
-    return hprint(`<pre>${s}</pre>`)
+    let pre = await hprint(`<pre>${s}</pre>`)
+    pre.classList.add('psudoclear')
+    return pre
 }
 
 /**
@@ -191,14 +232,18 @@ export function psudoclear() {
  * @param {*} delay 
  * @param {*} pre 
  */
-export async function typeprint(message, delay, pre) {
+export async function typeprint(message, delay, pre, ...classes) {
     // gotta love a lack of default params
     pre = pre || ""
     delay = delay || 100
     // as always, we start with a div
     let d = document.createElement('div')
     // Even if Pre doesn't exist, popping it into the beginning isn't detrimental
-    d.append(pre)
+    d.innerHTML = pre
+
+    for (let c of classes) {
+        d.classList.add(c)
+    }
     // If pre doesn't exist, we begin with the first character of the message string so that the
     // line doesn't collapse
     if (!pre) {
@@ -225,6 +270,12 @@ export async function typeprint(message, delay, pre) {
     // So that we don't end right away when the typing animation is done
     await twait(delay)
     return d
+}
+
+export async function dtypeprint(message, delay, pre, ...classes) {
+    classes.push('dialog')
+    classes.push(`name-${pre}`)
+    return await typeprint(message, delay, `<span class="dialog_tag">&lt${pre}&gt</span>`, ...classes)
 }
 
 /**
@@ -348,12 +399,16 @@ export async function tchoices(choiceobj) {
     // Default behavior is that delta (middle) is the next prompt
     choiceobj = choiceobj || {delta:'Next', nohandlechoice:true}
     // If the caller has given us a header in 'top', print it
+    let begin_class = 'choice_begin'
     let top = choiceobj['top']
     if (top) {
         await twait(500)
-        tdivider('-',top)
+        tdivider('-',top, begin_class)
         await twait(500)
+        begin_class = ''
     }
+
+    tprint(' ', 'choice-begin')        
     // We go through the greek symbols in order, and if there's
     // an option for them we print them with the symbol. The
     // style set in index.css makes it so that there's always going to
@@ -362,15 +417,17 @@ export async function tchoices(choiceobj) {
     // what you'd have on a phone or a changing browser window)
     for (let n of ['alpha', 'gamma', 'delta', 'sigma', 'omega']) {
         if (n in choiceobj) {
-            // delay enough for a good animation
+            // Give it a nice animation
             await twait(100)
             // First line floats right, to give a good margin
-            let m = tprint(symbols[n]+":")
-            m.classList.add('choice-indicator')
-            m.classList.add(n)
+            tprint(` ${symbols[n]} `, 'choice-indicator', n, begin_class)
             // Second line also floats right, fulfilling the margin 
-            let d = tprint(choiceobj[n])
-            d.classList.add('choice-text')
+            tprint(choiceobj[n], 'choice-text', begin_class)
+            // If we've given the beginning class to a line, give only empty
+            // lines going forward
+            if (begin_class) {
+                begin_class = ""
+            }
             // Clear so that the next option doesn't snuggle up with the first
             tfloatclear()
         }
@@ -381,9 +438,8 @@ export async function tchoices(choiceobj) {
     // If nohandlechoice is set to truthy, we don't print the choice
     // to the terminal... but we still return it later
     if (!choiceobj.nohandlechoice) {
-        await twait(500)
         // We add a line to the terminal, that we will then add to later
-        let yourchoiceline = tprint('Your Choice> ')
+        let yourchoiceline = await tprint('Your Choice> ')
         // Not every press will be needed. If we get a press that isn't,
         // we should ignore it and try again.
         let needsresolving = true
@@ -397,7 +453,8 @@ export async function tchoices(choiceobj) {
                 // text appear suddenly rather then animated in. 
                 let ind = document.createElement('span')
                 ind.classList.add(button_pressed)
-                ind.append(symbols[button_pressed]+":")
+                ind.classList.add('chosen-symbol')
+                ind.append(`${symbols[button_pressed]}`)
                 yourchoiceline.append(ind)
                 yourchoiceline.append(choiceobj[button_pressed])
                 // Tell the loop that its job is done
@@ -415,9 +472,6 @@ export async function tchoices(choiceobj) {
         await twait(500)
         tdivider()
     }
-    if (!choiceobj.noblank) {
-        tblank()
-    } 
     // Regardless, we want to make sure that floats are cleared just in case
     tfloatclear()
     // Promise resolves when a user selects an option
@@ -425,6 +479,7 @@ export async function tchoices(choiceobj) {
 }
 
 export function tchoicenext(message) {
+    message = message || "Continue..."
     return tchoices({delta:message, nohandlechoice:true})
 }
 
@@ -446,6 +501,11 @@ if (debug) {
     psudoclear()
 }
  
+/**
+ * Saves the state, in a numbered slot, along with terminal contents. Returns the slot number
+ * @param {Object} state 
+ * @param {Number} slot 
+ */
 export function savestate(state, slot) {
     if (slot == undefined) {
         slot = localStorage.length
@@ -456,6 +516,12 @@ export function savestate(state, slot) {
     return slot
 }
 
+/**
+ * Recovers state and terminal contents from storage. If restore_terminal_state is true, makes
+ * the terminal state what it was at the time of the former save
+ * @param {Number} slot 
+ * @param {boolean} restore_terminal_state 
+ */
 export function loadstate(slot, restore_terminal_state) {
     restore_terminal_state = restore_terminal_state || false
     if (slot in localStorage) {
@@ -466,6 +532,23 @@ export function loadstate(slot, restore_terminal_state) {
         return state
     }
     return false
+}
+
+/**
+ * Copies save data from one slot into another slot, potentially
+ * overwriting its contents.
+ * @param {Number} slot_from 
+ * @param {Number} slot_to 
+ */
+export function saveslotcopy(slot_from, slot_to) {
+    let thing = localStorage.getItem(slot_from)
+    localStorage.setItem(slot_to, thing)
+}
+
+export function saveslotshiftup(shiftamount) {
+    for (let i = 0; i<shiftamount; i++) {
+        saveslotcopy(i, i+1)
+    }
 }
 
 export function stateslotsused() {
