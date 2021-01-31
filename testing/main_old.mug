@@ -1,0 +1,132 @@
+clear
+remember $foo as 0
+> Starting this
+label beginning
+> Inside goto loop, foo is $foo
+to $foo add 1
+if $foo is 4: back
+> skipped on the last one
+goto beginning
+> And this comes after
+
+label fortuna
+> another goto loop
+choice foo or bar? :alpha: foo :delta: <give no answer> :omega: bar
+:alpha: goto fortuna
+:omega: goto thetop
+
+continue
+
+remember $tete as all of
+    1 bla bla,
+    4 gusset,
+    3 foo,
+    2 machine add things
+
+description bla bla: A useful thing, all told
+description foo: a random whatsit lying around
+description gusset: Some small machine part I think
+
+describe $tete
+
+>roll 4d12
+remember $thisres as $lastroll
+> roll was $thisres and also $lastroll
+roll 4d12
+> but now, roll is $lastroll, but we still have $thisres cached
+
+
+remember $testing as foo man chu
+remember $suckerdilly as testing is $testing
+> sucker dilly is $suckerdilly
+> something @bla bla in $tete
+remember $bl as @bla bla in $tete
+to $tete add @foo in $tete markers
+to $tete add @machine add things in $tete markers
+from $tete remove 4 markers
+> we've got @markers in $tete markers
+> Our bla count is $bl for sure
+> But, we can do it directly, like @foo in $tete or @gusset in $tete
+remember $mark as @markers in $tete
+> markers? we got $mark
+
+
+remember $cowbelly as 2
+remember $anumber as 42
+remember $stuffers as yes
+remember $bwww as no
+remember $bootman as all of
+    1 grams of thermite,
+    25 eagle feathers,
+    1 big black orb,
+    13 unlucky wishes
+
+> This should print to the screen
+" Johnny: This is speech by the dude
+# Johnny is a somewhat tall man, but without the grace of an elf or the
+    sturdiness of an ork
+.
+> Another what do you call it, followed by a wait
+wait
+> another wait, followed by a longer wait
+wait 1000
+> and yep, this works
+! This is emphasis text
+> The above is used to denote that to which close attention must be paid
+
+
+if $stuffers is yes:
+    > This should print
+remember $stuffers as no
+if $stuffers is yes: > This should not print
+remember $stuffers as yes
+if $stuffers is yes: > This should print again
+if $cowbelly is 0:
+    > And what do you know, it prints again
+if $anumber exceeds 40: > A number is over 40
+if $anumber exceeds 50: > but it's not over 50
+if $anumber under 50: > And a number is under 50
+if $anumber under 40: > And its not under 40
+if $bootman contains any grams of thermite: > We've got thermite!
+if $bootman contains exactly 25 eagle feathers: > And we've got feathers!
+if $bootman contains over 1 black orb: > but we don't have a black orb
+if $bootman contains over 10 eagle feathers: > Wait, we have a bunch of eagle feathers!
+if $bootman contains under 30 unlucky wishes: > ... man, we have unlucky wishes?
+
+remember $watertime as no
+
+choice What's for lunch?
+    :delta: A tuna sandwhich
+    :sigma: Whatever you can find at the store
+    :gamma: Nothing, you'll eat later
+    
+:delta: > This makes something happen
+
+:delta: > the result was a
+:delta: " fooman: Fooman says what the hell are you doing here?
+:delta: change :sigma: to Can't stop drinking water
+:delta: remember $watertime as yes
+:delta: again without :delta:
+:sigma: if $watertime is no: # Squats squats squats!
+:sigma: if $watertime is yes: # Guuuuuuzle that water
+:sigma: if $watertime is yes: remember $bwww as yes
+:gamma: " Billie: My name is not BILLIE!
+
+if $bwww is no: again
+> horray! you broke out of the loop
+
+
+
+> This is a template line, where bwww is $bwww and suckerdilly is $suckerdilly
+
+next is muu
+
+from $anumber remove 2
+to $anumber add 3
+to $cowbelly add $anumber
+to $bootman add 2 grams of thermite
+to $bootman add 6 figgy puddings
+to $bootman add 2 $testing
+> thermite on hand are @grams of thermite in $bootman grams
+> a number is $anumber
+> cowbelly is $cowbelly

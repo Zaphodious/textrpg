@@ -66,6 +66,7 @@ div#terminal div.choice-indicator {
     float: left;
     padding-left: 2ch;
     border-radius: 1ch;
+    padding-top: black solid 3px;
 }
 div#terminal div.choice-text {
     margin-left: calc(1ch * 0.4);

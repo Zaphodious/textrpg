@@ -1,0 +1,8 @@
+remember $character as Fred
+
+choice What's your name?
+    :gamma: $character
+    :delta: Why do you need to know?
+    :sigma: <Say Nothing>
+
+:gamma: > Nice to meet you, $character

@@ -416,7 +416,8 @@ export async function tchoices(choiceobj) {
     // but in a way that is friendly to switching screen size (like
     // what you'd have on a phone or a changing browser window)
     for (let n of ['alpha', 'gamma', 'delta', 'sigma', 'omega']) {
-        if (n in choiceobj) {
+        let t = choiceobj[n]
+        if (t && t != '//deleted//') {
             // Give it a nice animation
             await twait(100)
             // First line floats right, to give a good margin

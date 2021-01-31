@@ -1,0 +1,7 @@
+> Testing choice modification
+
+choice lunch What are you having for lunch?
+    :gamma: Whatever I like
+    :delta: Ehh... stuff
+    :sigma: I don't know, can you suggest something?
+

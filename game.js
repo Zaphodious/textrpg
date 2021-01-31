@@ -127,17 +127,12 @@ let entries = {firstfight}
 console.log(entries)
 
 async function engine(playerstate) {
-    // A guard against infinite looping- if the time
-    // between loops is less then half a second, throw up an interupt.
-    let last_iter_time = 0
     // Loops continuously until the game indicates that it is done
     while (playerstate.playing) {
-        console.log(Date.now())
-        let hasbeen = Date.now() - last_iter_time
-        console.log(hasbeen)
-        if (hasbeen < 10000) {
-            await terminal.tchoicenext("Infinite loop detected")
-        }
+        // Adds enough of a delay between iterations
+        // that a lack of pause within an entry
+        // will cause the window to freeze up
+        await terminal.twait(500)
         // The previous entry will have set 'next' to the ID of the enxt entry.
         // Here, we determine it
         let nextname = playerstate.next.split('.')
@@ -150,6 +145,9 @@ async function engine(playerstate) {
                 try {
                     // We invoke the function, waiting for it to be done
                     await func(playerstate)
+                    // Continue after
+                    await terminal.tchoicenext()
+                    terminal.psudoclear()
                     // Then we shift all previous saves up, filling a total of 5 slots
                     // Later, will we make the engine recognize when it's already
                     // recovered from an error, and walk the save back through all five slots
