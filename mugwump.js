@@ -109,7 +109,8 @@ async function parser(text, scriptstate) {
         if (line.match(resultline_regex)) {
             let ind = line.match(choiceind_regex)[0]
             if (ind === choiceresult) {
-                line = line.split(ind+": ")[1]
+                // line = line.split(ind+": ")[1]
+                line = line.substring(ind.length + 3)
             }
         }
         if (line.startsWith('if')) {
@@ -166,6 +167,25 @@ async function parser(text, scriptstate) {
                 line = maybeline
             }
         }
+        if (line.startsWith('again')) {
+            // console.log('i was ', i)
+            let [ag, opt] = line.split(' ')
+            if (opt) {
+                lastchoice = opt
+            }
+            i = choices_ind[lastchoice]-1
+            // console.log('i is now', i)
+            continue
+        } else if (line.startsWith('change')){
+            let [ag, ind] = line.split(' ')
+            let newtext = line.split('to ')[1]
+            ind = ind.match(choiceind_regex)[0]
+            choices[lastchoice][ind] = newtext
+        } else if (line.startsWith('delete')) {
+            let [ag, ind] = line.split(' ')
+            ind = ind.match(choiceind_regex)[0]
+            delete choices[lastchoice][ind]
+        }
         if (line.startsWith('goto')) {
             let splits = line.split(' ')
             let label = splits[1]
@@ -175,29 +195,12 @@ async function parser(text, scriptstate) {
                 lastgoto = i
                 i = labels[label]
                 choiceresult = undefined
-                choices = {}
                 choiceline = 0
                 continue
             }
         }
         if (line.startsWith('back')) {
             i = lastgoto+1
-        }
-        if (line.startsWith('again')) {
-            // console.log('i was ', i)
-            i = choiceline+1
-            // console.log('i is now', i)
-            let [ag, keyword, ind] = line.split(' ')
-            if (keyword === 'without') {
-                ind = ind.match(choiceind_regex)[0]
-                delete choices[ind]
-            }
-            choiceresult = await terminal.tchoices(choices)
-        } else if (line.startsWith('change')) {
-            let [ag, ind] = line.split(' ')
-            let newtext = line.split('to ')[1]
-            ind = ind.match(choiceind_regex)[0]
-            choices[ind] = newtext
         }
         if (line.startsWith('choice ')) {
             // First, let's get the label for this choice line
@@ -219,7 +222,7 @@ async function parser(text, scriptstate) {
                 // console.log(choices)
                 let text = line.match(choicetxt_regex)[0]
                 if (!text.match(choiceind_regex)) {
-                    choices['top'] = text
+                    thesechoices['top'] = text
                 }
                 choices[lastchoice] = thesechoices
             }

@@ -1,7 +1,32 @@
 > Testing choice modification
 
+choice breakfast Breakfast is coffee and, what?
+    :gamma: You're wrong about the coffee
+    :delta: Eggs and bacon please
+    :sigma: Cerial. Nothing fancy.
+
+:gamma: > No, coffee is happening
+:gamma: delete :gamma:
+:delta: > Sorry mate, no eggs or bacon here
+:delta: delete :delta:
+:delta: again dinner
+:sigma: > Huh, okay. I approve
+
 choice lunch What are you having for lunch?
     :gamma: Whatever I like
     :delta: Ehh... stuff
     :sigma: I don't know, can you suggest something?
 
+:delta: change :delta: to ...French Fries
+:sigma: delete :gamma:
+:sigma: again
+:gamma: again breakfast
+
+choice dinner We're doing dinner now. What'll it be?
+    :gamma: Whatever you've got
+    :delta: Steak?
+    :sigma: Salad, if you've got it
+
+:delta: again lunch
+:gamma: again
+:sigma: again breakfast
