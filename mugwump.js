@@ -1,7 +1,7 @@
 import * as terminal from './terminal.js'
 
 export default async function start(save_function, load_function) {
-    let rootfolder = './testing/'
+    let rootfolder = './mugwump/'
     // console.log('start thing')
     if (!save_function) {
         save_function = (s) => localStorage.setItem('savestate', JSON.stringify(s))
@@ -104,6 +104,9 @@ async function parser(text, scriptstate) {
             commenttime = false
         }
         if (commenttime) {
+            continue
+        }
+        if (line.startsWith('//')) {
             continue
         }
         if (line.match(resultline_regex)) {
