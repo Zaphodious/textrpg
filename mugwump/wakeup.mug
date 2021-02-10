@@ -1,0 +1,176 @@
+remember $hostname as ?
+
+>" $hostname: Hey
+wait 1000
+>" $hostname: Are you awake?
+wait 1000
+>" $hostname: How are you feeling?
+remember $firstfeeling as no
+choice firstfeeling
+    :gamma: Pretty well
+    :delta: ...
+    :sigma: I... who... am I?
+
+:gamma: >" $hostname: That's good to hear. Considering that scar, feeling at all is good
+:gamma: remember $firstfeeling as well
+:delta: >" $hostname: Yeah, I guess you wouldn't be talking much right now
+:delta: remember $firstfeeling as mute
+:sigma: >" $hostname: You're um... well, I guess you got knocked out good, didn't you?
+:sigma: remember $firstfeeling as amnesiac
+
+continue Huh? What happened?
+
+:delta: >" $hostname: Oh good, so you __can__ talk!
+:delta: continue uhh...
+:delta: >" $hostname: Anyways
+:delta: with $rep add 1 Jack
+
+>" $hostname: I don't know, honestly. I found you in the gutter with that __massive__ head wound.
+
+continue
+
+>" $hostname: Your clothes are too nice for you to be homeless or a junkie, so I brought you back here
+wait 2000
+
+choice anygratitude
+    :gamma: Well, thank you. I appreciate that.
+    :delta: Thats... too generous. What do I owe you?
+    :sigma: What if I really __was__ a junkie?
+
+:gamma: > Your host smiles warmly
+:gamma: >" $hostname: No problem. I hope that you return the favor someday,
+    if you have the opportunity
+:gamma: remember $gratitude as warm
+:gamma: with $rep add 3 Jack
+
+:delta: > Your host laughs, seemingly amused
+:delta: >" $hostname: You don't owe me anything, pilgrim. I just
+    hope that you pay this forward. That's all.
+:delta: remember $gratitude as suspicious
+:delta: with $rep add 1 Jack
+
+>.
+:sigma: > Your host frowns, and thinks a moment, then smiles slightly
+wait 2000
+:sigma: >" $hostname: You aren't. You've spent more then a few days on my couch,
+    and there haven't been any withdrawls. Even if you were hooked on
+    simla-vids, you'd have woken up far less lucid then what you
+    showed me above.
+:sigma: if $firstfeeling is amnesiac: >" $hostname: And besides, if you were
+    _mentally_ hooked on something, your memory being rattled
+    should put that to bed anyway.
+:sigma: remember $gratitude as junkie
+:sigma: with $rep add 5 Jack
+:sigma: again reallyusing
+
+choice verynice
+    :delta: <smile> Given the circumstances, I dare not say no
+    :gamma: <raise an eyebrow> That sounds reasonable
+    :sigma: <frown slightly> I'll see what I can do, but you know what it's like.
+    I can't make any promises
+
+:delta: > Again, your host smiles
+:delta: >" $hostname: That's good enough for me
+:delta: with $rep add 5 Jack
+
+:gamma: > Your host smiles slightly
+:gamma: if $gratitude is suspicious: Again, that is all. I'm doing this to 
+    try and help things. If you need a self-serving answer, it makes me feel good.
+:gamma: if $gratitude isn't suspicious: Really, that's all. Maybe the world
+    will improve with enough selfless acts. Dunno. I feel better though.
+
+:sigma: >" $hostname: Well, I guess that I'll have to do with that.
+:sigma: with $rep remove 5 Jack
+
+continue
+
+>" $hostname: Oh! Before I forget, you had a bag with you when you arrived. Let me grab it now.
+>.
+> Your host lifts themselves from their char, and departs from the room. 
+    You yourself sit up in your bed, and begin to have a look around
+continue
+> Before you have much of a chance to look, your host returns,
+    a brown leather sachel in his hands.
+again handedbag
+
+choice reallyusing
+    :gamma: That's fairly astute. You a user?
+    :delta: Well... I suppose you're right.
+    :sigma: ...
+
+:gamma: >" $hostname: No, I'm not a user. Nor am I a doctor. I've just been around
+    the block a few times.
+:gamma: >" $hostname: Anyways. You need to relax a bit longer. A doctor friend 
+    of mine has patched you up as well as he could, and now that you're awake
+    you should be good to go in a day or two.
+:gamma: continue <try and supress the look of horror on your face, at the
+    thought of your injury being registered>
+:gamma: >" $hostname: Oh, don't worry my friend. The doc kept this visit off the
+    books. 
+:gamma: remember $knowsAboutDoc as yes
+
+:delta: >" $hostname: This many years of seeing suffering, and you learn
+    a thing or two. 
+
+:sigma: >" $hostname: It's alright. Just relax my friend.
+:sigma: if $firstfeeling is amnesiac: >" Even if you don't remember it, it looks
+    like you've been through a lot.
+:sigma: if $firstfeeling isn't amnesiac: >" I can only guess what happened
+    to you, and my guess is that you were put through the wringer
+
+continue
+
+>" $hostname: I just ask that you help someone else later on down the line.
+again verynice
+
+choice handedbag
+    :alpha: <Look at the bag>
+    :gamma: <Take the bag>
+    :delta: No thanks, you can keep whatever's in there. I owe you that much.
+    :sigma: <Look around the room>
+    :omega: <Try and remember what's in the bag>
+
+:alpha: remember $hasLookedAtBag as yes
+:alpha: > You look at the bag. It is a black leather backpack closed with
+    straps, that would go well with what you presume is your suit
+    hanging on the wall. There are obviously a few things in teh bag, and from
+    how your host is holding the thing it would seem to have some weight to it.
+:alpha: delete :alpha:
+
+:omega: delete :omega:
+:omega: if not $hasLookedAtBag: You don't remember much about the bag.
+    Maybe your ID might have been in there.
+:omega: if not $hasLookedAtBag: again handedbag
+:omega: remember $hasRememberedBagContents as yes
+:omega: > You remember that you had a small amount
+    of money in the bag, but also your identification card, phone, and some other
+    sentimental items.
+:omega: if not $offeredBag: change :delta: <Take the bag, while saying>
+    You're a good man. Do you want to get a drink? Round's on me. 
+
+:delta: if not $hasRememberedBagContents: > Your host looks curiously at
+    you, with a raised eyebrow and a slight frown.
+:delta: if not $hasRememberedBagContents: >" $hostname: Let's not be
+    rash, now. I appreciate the gesture but you wouldn't have had
+    this on you if it wasn't important to you.
+:delta: if not $hasRememberedBagContents: continue 
+:delta: if not $hasRememberedBagContents: >" $hostname: Come to
+    think of it, I might want to call Doc again... but
+    regardless, take your bag, my friend
+:delta: if not $hasRememberedBagContents: delete :delta: 
+:delta: if not $hasRememberedBagContents: remember $offeredBag as yes 
+:delta: if not $hasRememberedBagContents: again handedbag
+
+
+:sigma: > You're in a tiny apartment, on a bed in what could have
+    been a closet in a larger home. Your host is seated on a
+    plush but threadbear antique-style sitting-room
+    chair. The wallpaper looks roughly two hundred years
+    out of date and the gaudiness makes you mildly
+    nautious. There are clothes and random piles
+    of clutter on various surfaces that you can see. Hanging
+    from the wall is a scuffed but handsom suit that
+    looks like it would be too small for your host, but
+    just the right size for you.
+:sigma: delete :sigma:
+:sigma: again handedbag

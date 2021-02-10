@@ -3,7 +3,7 @@ remember $foo as 0
 > Starting this
 label beginning
 > Inside goto loop, foo is $foo
-to $foo add 1
+with $foo add 1
 if $foo is 4: back
 > skipped on the last one
 goto beginning
@@ -16,6 +16,8 @@ choice foo or bar? :alpha: foo :delta: <give no answer> :omega: bar
 :omega: goto thetop
 
 continue
+
+nextnow! muu foo two
 
 remember $tete as all of
     1 bla bla,
@@ -41,15 +43,17 @@ remember $suckerdilly as testing is $testing
 > sucker dilly is $suckerdilly
 > something @bla bla in $tete
 remember $bl as @bla bla in $tete
-to $tete add @foo in $tete markers
-to $tete add @machine add things in $tete markers
-from $tete remove 4 markers
+with $tete add @foo in $tete markers
+with $tete add @machine add things in $tete markers
+with $tete remove 4 markers
 > we've got @markers in $tete markers
 > Our bla count is $bl for sure
 > But, we can do it directly, like @foo in $tete or @gusset in $tete
 remember $mark as @markers in $tete
 > markers? we got $mark
 
+
+comment/ 
 
 remember $cowbelly as 2
 remember $anumber as 42
@@ -61,17 +65,20 @@ remember $bootman as all of
     1 big black orb,
     13 unlucky wishes
 
-> This should print to the screen
-" Johnny: This is speech by the dude
-# Johnny is a somewhat tall man, but without the grace of an elf or the
+/comment 
+
+> This should print
+    to the screen
+>" Johnny: This is speech by the dude
+># Johnny is a somewhat tall man, but without the grace of an elf or the
     sturdiness of an ork
-.
+>.
 > Another what do you call it, followed by a wait
 wait
 > another wait, followed by a longer wait
 wait 1000
 > and yep, this works
-! This is emphasis text
+>! This is emphasis text
 > The above is used to denote that to which close attention must be paid
 
 
@@ -103,30 +110,32 @@ choice What's for lunch?
 :delta: > This makes something happen
 
 :delta: > the result was a
-:delta: " fooman: Fooman says what the hell are you doing here?
+:delta: >" fooman: Fooman says what the hell are you doing here?
 :delta: change :sigma: to Can't stop drinking water
 :delta: remember $watertime as yes
 :delta: again without :delta:
-:sigma: if $watertime is no: # Squats squats squats!
-:sigma: if $watertime is yes: # Guuuuuuzle that water
+:sigma: if $watertime is no: ># Squats squats squats!
+:sigma: if $watertime is yes: ># Guuuuuuzle that water
 :sigma: if $watertime is yes: remember $bwww as yes
-:gamma: " Billie: My name is not BILLIE!
+:gamma: >" Billie: My name is not BILLIE!
 
 if $bwww is no: again
 > horray! you broke out of the loop
 
-
+block/
 
 > This is a template line, where bwww is $bwww and suckerdilly is $suckerdilly
 
-next is muu
+next: muu
 
-from $anumber remove 2
-to $anumber add 3
-to $cowbelly add $anumber
-to $bootman add 2 grams of thermite
-to $bootman add 6 figgy puddings
-to $bootman add 2 $testing
+with $anumber remove 2
+with $anumber add 3
+with $cowbelly add $anumber
+with $bootman add 2 grams of thermite
+with $bootman add 6 figgy puddings
+with $bootman add 2 $testing
 > thermite on hand are @grams of thermite in $bootman grams
 > a number is $anumber
 > cowbelly is $cowbelly
+
+/block

@@ -1,5 +1,28 @@
 import * as terminal from './terminal.js'
 
+// from https://davidwalsh.name/javascript-download, modified
+export function downloadSave(playerstate, filename) {
+    // Create an invisible A element
+    const a = document.createElement("a");
+    a.style.display = "none";
+    document.body.appendChild(a);
+  
+    // Set the HREF to a Blob representation of the data to be downloaded
+    a.href = window.URL.createObjectURL(
+      new Blob([JSON.stringify(playerstate)], { type: "application/json" })
+    );
+  
+    // Use download attribute to set set desired file name
+    a.setAttribute("download", filename);
+  
+    // Trigger the download by simulating click
+    a.click();
+  
+    // Cleanup
+    window.URL.revokeObjectURL(a.href);
+    document.body.removeChild(a);
+  }
+
 export async function print_inventory(playerstate) {
     for (let [k,v] of Object.entries(playerstate.bag)) {
         terminal.tblank()

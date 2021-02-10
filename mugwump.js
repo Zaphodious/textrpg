@@ -1,4 +1,5 @@
 import * as terminal from './terminal.js'
+import * as util from './game_util.js'
 
 export default async function start(save_function, load_function) {
     let rootfolder = './mugwump/'
@@ -16,11 +17,25 @@ export default async function start(save_function, load_function) {
         if (save_function) {
             save_function(scriptstate)
         }
-        let m = await (await fetch(`${rootfolder}${scriptstate.nextentry}.mug`)).text()
+        let m = await fetch_mug(rootfolder, scriptstate.nextentry)
         scriptstate.nextentry = false
-        await parser(m, scriptstate)
+        await parser(m, scriptstate, save_function, nextnow_builder(save_function, rootfolder))
     }
     terminal.tprint("End of game")
+}
+
+async function fetch_mug(rootfolder, entryID) {
+        let m = await (await fetch(`${rootfolder}${entryID}.mug`)).text()
+        return m
+}
+
+function nextnow_builder(savefunction, rootfolder) {
+    async function do_next(entryID, scriptstate) {
+        let m = await fetch_mug(rootfolder, entryID)
+        await parser(m, scriptstate, savefunction, do_next)
+        return true
+    }
+    return do_next
 }
 
 
@@ -43,14 +58,26 @@ async function mainmenu(rootfolder, save_function, load_function) {
         }
         if (existant) {
             mainchoices.alpha = "New Game"
-            mainchoices.gamma = "Export Save File"
-            mainchoices.delta = "Load"
-            mainchoices.sigma = "Examine Saved Game"
-            mainchoices.omega = "Delete Save File"
+            mainchoices.gamma = "Examine Saved Game"
+            mainchoices.delta = "Play Saved Game"
+            mainchoices.sigma = "Export Save File"
+            mainchoices.omega = "Upload Save File"
         }
-        let res = await terminal.tchoices(mainchoices)
-        if (res == "delta") {
-            scriptstate = existant || scriptstate
+        let inmenu = true
+        while(inmenu) {
+            let res = await terminal.tchoices(mainchoices)
+            if (res == "delta") {
+                scriptstate = existant || scriptstate
+                inmenu = false
+            }
+            if (existant) {
+                if (res == "alpha") {
+                    inmenu = false
+                } else if (res == "sigma") {
+                    util.downloadSave(existant, 'save: ' + infojson.name + ' by: ' + infojson.author)
+                }
+            }
+            terminal.psudoclear()
         }
         await terminal.typeprint(".....")
         await terminal.tprint("Game Loaded...")
@@ -62,13 +89,12 @@ async function mainmenu(rootfolder, save_function, load_function) {
     return scriptstate
 }
 
-
-async function parser(text, scriptstate) {
+async function parser(text, scriptstate, savefunction, nextnow) {
     // Create a key-value store where script vars are kept
     // console.log('parsing started')
     // If a newline is followed by a tab, then it is part of the previous line
-    let newtext = text.replace(entertab_regex, ' ')
-    // console.log(newtext)
+    let newtext = text.replace(/\n\t|\n    /g, ' ')
+    console.log('newtext is ', newtext)
     // We want to process each line, which ends in a newline char
     let aslines = newtext.split('\n')
     // If we're in a result or other context, we don't want to do each thing
@@ -78,27 +104,20 @@ async function parser(text, scriptstate) {
     let choices_ind = {}
     let lastchoice = undefined
     let choiceline = 0
-    let lastgoto = 0
     // Preprocess
-    let labels = {'thetop': -1}
     for (let i = 0; i<aslines.length; i++) {
         let line = aslines[i]
         let splits = line.split(' ')
-        if (line.startsWith('label')) {
-            line = line.replace('label ', '')
-            labels[line] = i
-        }
         if (line.startsWith('choice')) {
             choices_ind[splits[1]] = i
         }
     }
-    console.log(labels)
     console.log(choices_ind)
     // Process over each line
     for (let i = 0; i<aslines.length; i++){
         let line = aslines[i]
     // for (let line of aslines) {
-        if (line === 'comment') {
+        if (line === 'comment/') {
             commenttime = true
         } else if (line === '/comment') {
             commenttime = false
@@ -117,11 +136,19 @@ async function parser(text, scriptstate) {
             }
         }
         if (line.startsWith('if')) {
+
             let [conditional, maybeline] = line.replace('if ', '').split(': ')
             let [thevar, switcher, cond] = conditional.split(' ')
-            let passes = false
+
+            let passes = undefined
             let thingy = scriptstate[thevar]
             // console.log('>>cond', thevar, switcher, cond)
+            if (switcher === undefined) {
+                passes = thingy === true
+            }
+            if (thevar === 'not') {
+                passes = !literalsolver(switcher, scriptstate)
+            }
             switch (switcher) {
                 case 'is':
                     cond = literalsolver(cond)
@@ -166,9 +193,21 @@ async function parser(text, scriptstate) {
                     // console.log('testline', testline)
                     break
             }
+            if (passes === undefined) {
+                let fullcond = line.substring(2)
+                let boold = logicop(templatereplace(fullcond, scriptstate))
+                if (boold === true || boold === false) {
+                    passes = boold
+                }
+            }
             if (passes) {
                 line = maybeline
             }
+        }
+        if (line.startsWith('nextnow!')) {
+            let rest = line.substring(9)
+            await nextnow(rest, scriptstate)
+            continue
         }
         if (line.startsWith('again')) {
             // console.log('i was ', i)
@@ -189,22 +228,6 @@ async function parser(text, scriptstate) {
             ind = ind.match(choiceind_regex)[0]
             delete choices[lastchoice][ind]
         }
-        if (line.startsWith('goto')) {
-            let splits = line.split(' ')
-            let label = splits[1]
-            console.log('goto label is', JSON.stringify(label), 'mapping to ', labels[label])
-            if (labels[label]) {
-                console.log('makes it here')
-                lastgoto = i
-                i = labels[label]
-                choiceresult = undefined
-                choiceline = 0
-                continue
-            }
-        }
-        if (line.startsWith('back')) {
-            i = lastgoto+1
-        }
         if (line.startsWith('choice ')) {
             // First, let's get the label for this choice line
             let splits = line.split(' ')
@@ -223,8 +246,9 @@ async function parser(text, scriptstate) {
                     // console.log(choices)
                 }
                 // console.log(choices)
-                let text = line.match(choicetxt_regex)[0]
-                if (!text.match(choiceind_regex)) {
+                console.log(line)
+                let text = (line.match(choicetxt_regex)|| [])[0]
+                if (!text || !text.match(choiceind_regex)) {
                     thesechoices['top'] = text
                 }
                 choices[lastchoice] = thesechoices
@@ -248,7 +272,12 @@ async function normal_line(line, scriptstate) {
                 terminal.psudoclear()
                 break
             case 'continue' :
-                await terminal.tchoicenext(rest)
+                rest = templatereplace(rest, scriptstate)
+                if (terminal.debug) {
+                    await terminal.tprint(`debug continue: ${rest || "Continue..."}`)
+                } else {
+                    await terminal.tchoicenext(rest)
+                }
                 break
             case '>roll':
                 loud = true
@@ -332,8 +361,8 @@ async function normal_line(line, scriptstate) {
                 }
                 
                 break
-            case 'next':
-                rest = templatereplace(rest, scriptstate).substring(3)
+            case 'next:':
+                // rest = templatereplace(rest, scriptstate)
                 scriptstate.nextentry = rest
                 break
             // If the line is 'remember', it is a var
@@ -346,10 +375,11 @@ async function normal_line(line, scriptstate) {
                 await terminal.tprint(rest)
                 break
             // double quote indicates that the line should be presented as something someone says
-            case '"':
+            case '>"':
                 // The name is whatever is between the double quote and the first colin
                 rest = templatereplace(rest, scriptstate)
                 let name = rest.split(': ')[0]
+                rest = rest.split(`${name}: `)[1]
                 // console.log(name)
                 await terminal.dprint(name, rest)
                 break
@@ -357,16 +387,16 @@ async function normal_line(line, scriptstate) {
                 await terminal.twait(rest || 500)
                 break
             // The hash is aside text, for descriptions or other distinct text
-            case '#':
+            case '>#':
                 rest = templatereplace(rest, scriptstate)
                 await terminal.tprint(rest, 'exposition')
                 break
             // the single stop is a newline
-            case '.':
+            case '>.':
                 rest = templatereplace(rest, scriptstate)
                 await terminal.tblank()
                 break
-            case '!':
+            case '>!':
                 rest = templatereplace(rest, scriptstate)
                 await terminal.typeprint(rest)
                 break
@@ -382,14 +412,24 @@ function out(line, scriptstate) {
 }
 
 function remember(line, scriptstate) {
+    console.log(line)
     let varname = line.split(' ')[1]
-    let value = line.split('as ')[1]
-    scriptstate[varname] = literalsolver(value, scriptstate)
+    if (varname.startsWith('$')) {
+        let value = line.split('as ')[1]
+        scriptstate[varname] = literalsolver(value, scriptstate)
+    } else {
+        terminal.tprint(`Error! To remember __${varname}__, you must add 
+        a '$' so that it is __$${varname}__. As a result, __${varname}__ 
+        was not remembered.`, 'errormessage')
+    }
     // console.log(scriptstate)
 }
 
 function literalsolver(value, scriptstate) {
     let realvalue = undefined
+    if (value.startsWith(' ')) {
+        value = value.substring(1)
+    }
     let splitline = value.split(' ')
     if (varname_only_regex.test(value)) {
         value = scriptstate[value]
@@ -398,11 +438,12 @@ function literalsolver(value, scriptstate) {
     if (value == 'yes') {realvalue = true}
     else if (value == 'no') {realvalue = false}
     else if (!isNaN(Math.ceil(value)))(realvalue = Math.ceil(value))
-    else if (splitline[0]=='all' && splitline[1]=='of') {
+    else if (value.startsWith("all of")) {
         let newinventory = {}
         let rawitems = value.split(',')
         rawitems[0] = rawitems[0].substring(6)
-        // console.log('invstring is ', rawitems)
+        console.log('invstring is ', rawitems)
+        console.log(value)
         for (let item of rawitems) {
             let quantity = item.split(' ')[1]
             let actualitem = item.split(quantity)[1].substring(1)
@@ -424,8 +465,23 @@ function literalsolver(value, scriptstate) {
         }
         realvalue = value
     }
+    if (typeof realvalue === 'string') {
+        realvalue = logicop(realvalue)
+    }
     return realvalue
 
+}
+
+function logicop(teststring) {
+    for (let {exp, fn} of Object.values(boolops_regexs)) {
+        let m = teststring.match(exp)
+        if (m) {
+            let a = literalsolver(m[1])
+            let b = literalsolver(m[2])
+            return fn(a,b)
+        }
+    }
+    return teststring
 }
 
 function templatereplace(line, scriptstate) {
@@ -444,20 +500,29 @@ function templatereplace(line, scriptstate) {
     }
     console.log(accesses)
     // After we've done inv access, we can do a direct replace
-    for (let k of Object.keys(scriptstate)) {
-        if (line.includes(k)) {
-            let v = scriptstate[k]
-            switch(v) {
-                case true:
-                    v = 'yes'
-                    break
-                case false:
-                    v = 'no'
-                    break
-            }
-            line = line.replace(k, v)
-        }
+    console.log('replacement: happening')
+    for (let k of line.matchAll(/\$.+?\b/g)) {
+        console.log('replacement: ', k)
+        let thing = scriptstate[k[0]]
+        if (thing === true){thing = 'yes'}
+        else if (thing === false){thing = 'no'}
+        else if (thing === undefined){thing = 'no'}
+        line = line.replace(k[0], thing)
     }
+    // for (let k of Object.keys(scriptstate)) {
+    //     if (line.includes(k)) {
+    //         let v = scriptstate[k]
+    //         switch(v) {
+    //             case true:
+    //                 v = 'yes'
+    //                 break
+    //             case false:
+    //                 v = 'no'
+    //                 break
+    //         }
+    //         line = line.replace(k, v)
+    //     }
+    // }
     return line
 }
 
@@ -478,3 +543,9 @@ let varname_only_regex = /^\$\w+?(?=$)/
 let invaccess_regex = /\$\w+\(.*\)/g
 
 let invaccess_regex_alt = /@(.+?) (in+?) (\$\w+)/g
+
+let boolops_regexs = {
+    'and': {exp: /both (yes|no) and (yes|no)/, fn: (a,b)=>a && b},
+    'or': {exp: /either (yes|no) or (yes|no)/, fn: (a,b)=>a || b},
+    'nor': {exp: /neither (yes|no) nor (yes|no)/, fn: (a,b)=>!(a || b)},
+}

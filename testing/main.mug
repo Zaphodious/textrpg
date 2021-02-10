@@ -22,7 +22,7 @@ choice lunch What are you having for lunch?
 :sigma: again
 :gamma: again breakfast
 
-choice dinner We're doing dinner now. What'll it be?
+choice dinner We're doing dinner now. What'll it be again dear?
     :gamma: Whatever you've got
     :delta: Steak?
     :sigma: Salad, if you've got it
@@ -30,3 +30,4 @@ choice dinner We're doing dinner now. What'll it be?
 :delta: again lunch
 :gamma: again
 :sigma: again breakfast
+again dinner

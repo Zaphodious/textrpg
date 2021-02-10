@@ -51,6 +51,26 @@ div#terminal {
     font-size: 15px;
 }
 
+strong {
+    font-weight: 900;
+    text-transform:uppercase;
+    color: turquoise;
+}
+
+em {
+    color: white;
+}
+
+strong em {
+    color: magenta;
+}
+
+.errormessage {
+    background: maroon;
+    color: lightgray;
+    border-top: red 2px solid;
+    border-bottom: red 3px double;
+}
 
 div#terminal div {
     display:block;

@@ -114,6 +114,42 @@ export async function tblank(...classes) {
     return d
 }
 
+let emexp = /((\*\*|__|_\*).+?(\*\*|__|\*_))/g
+function do_em(messagestring) {
+    if (typeof messagestring === 'string') {
+        let a = messagestring.split(emexp)
+            console.log("a is : ", a)
+        a = a.map(s=>{
+            let elem = undefined
+            let news = undefined
+            if (s == '__' || s == '**' || s == '*_' || s == '_*') {
+                return ''
+            }
+            if (s.startsWith('**') && s.endsWith('**')) {
+                elem = document.createElement('strong')
+                news = s.replace(/\*\*|\*\*/g, '')
+                elem.append(news)
+            } else if (s.startsWith('__') && s.endsWith('__')) {
+                elem = document.createElement('em')
+                news = s.replace(/__|__/g, '')
+                elem.append(news)
+            } else if (s.startsWith('_*') && s.endsWith('*_')) {
+                elem = document.createElement('strong')
+                let oelem = document.createElement('em')
+                news = s.replace(/_\*|\*_/g, '')
+                oelem.append(news) 
+                elem.append(oelem)
+            }
+            console.log(elem)
+            return elem || s
+        })
+        return a
+    } else {
+        return messagestring
+    }
+
+}
+
 /**
  * Prints messagecontents to the terminal screen. If
  * messagecontents is an array, loops over the array and
@@ -123,16 +159,25 @@ export async function tblank(...classes) {
 export async function tprint(messagecontents, ...classes) {
     // We're putting everything we do inside a div
     let d = document.createElement('div')
+    // The pre-processor will let us handle speical formatting
+    messagecontents = do_em(messagecontents)
     // If this is an array of elements, each one gets added to the div individually
     if (Array.isArray(messagecontents)) {
         for (let el of messagecontents) {
             // Append them one by one
-            d.append(el)
+            console.log("el is: ", el)
+            if (typeof el === "string") {
+                d.append(el)
+            } else {
+                console.log("this element is ", el)
+                d.appendChild(el)
+            }
         }
     } else {
         // We use .append in particular, because it handles text. Other methods are
         // DOM-node spcific
         d.append(messagecontents)
+        // d.innerHTML += do_em(messagecontents)
     }
     console.log(messagecontents, classes)
     for (let c of classes) {
@@ -160,7 +205,8 @@ export async function dprint(name, messagecontents, ...classes) {
     if (Array.isArray(messagecontents)) {
         messagecontents = [s, " ", ...messagecontents]        
     } else {
-        messagecontents = [s, " ", messagecontents]
+        messagecontents = [s, " ", ...do_em(messagecontents)]
+        console.log(messagecontents)
     }
     classes.push('dialog')
     classes.push(`name-${name}`)

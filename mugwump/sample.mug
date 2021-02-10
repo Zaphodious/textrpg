@@ -1,0 +1,14 @@
+> Hello, this thing is printed to the screen!
+>" Jack: And now Jack is saying a thing
+
+remember $goo is Whatever you want
+> The value of goo is $goo, ain't that neat
+
+choice demochoice What kind of fruit do you want?
+    :gamma: An Apple
+    :delta: A pear
+    :sigma: A banana
+
+:gamma: >" Jack: I like apples too! But only the fruit, not the computers.
+:delta: >" Jack: I don't like pears so much. Maybe in tea.
+:sigma: >" Jack: I'm actually Alex, and I can't have Bananas
