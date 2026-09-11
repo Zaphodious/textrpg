@@ -1,4 +1,4 @@
 remember $repi as all of
     0 Jack
-// next: wakeup
-next: sample
+next: wakeup
+// next: sample
